@@ -1,0 +1,1 @@
+MODELS_ROOT = "/models"
