@@ -70,9 +70,9 @@ def get_responses(
     }
 
 
-async def run_algorithm(data: BaseModel, algorithm: Any) -> BaseModel:
+async def run_algorithm(algorithm: Any, data: BaseModel, *args: Any) -> BaseModel:
     try:
-        return await algorithm.run(data)
+        return await algorithm.run(data, *args)
     except Exception as err:
         raise_err(err)
 

@@ -175,7 +175,7 @@ class AlgorithmBase(WithRegister, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def run(self, data: Any) -> Any:
+    async def run(self, data: Any, *args: Any) -> Any:
         pass
 
     @property

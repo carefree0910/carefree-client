@@ -1,15 +1,12 @@
 import os
 import yaml
-import logging
 import datetime
 import logging.config
 
 from enum import Enum
 from typing import Any
 from typing import Dict
-from fastapi import Depends
 from fastapi import FastAPI
-from fastapi import UploadFile
 from pydantic import BaseModel
 from pkg_resources import get_distribution
 from fastapi.openapi.utils import get_openapi
@@ -134,7 +131,7 @@ async def health_check() -> HealthCheckResponse:
 
 @app.post(demo_hello_endpoint, responses=get_responses(HelloResponse))
 async def hello(data: HelloModel) -> HelloResponse:
-    return await run_algorithm(data, loaded_algorithms["demo.hello"])
+    return await run_algorithm(loaded_algorithms["demo.hello"], data)
 
 
 # events

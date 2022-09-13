@@ -1,3 +1,4 @@
+from typing import Any
 from pydantic import Field
 from pydantic import BaseModel
 
@@ -20,7 +21,7 @@ class Hello(AlgorithmBase):
     def initialize(self) -> None:
         pass
 
-    async def run(self, data: HelloModel) -> HelloResponse:
+    async def run(self, data: HelloModel, *args: Any) -> HelloResponse:
         return HelloResponse(msg=f"Hello, {data.name}!")
 
 
