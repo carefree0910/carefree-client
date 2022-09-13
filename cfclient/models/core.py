@@ -180,7 +180,7 @@ class AlgorithmBase(WithRegister, metaclass=ABCMeta):
 
     @property
     def http_client(self) -> Optional[HttpClient]:
-        return self.clients.get("triton")
+        return self.clients.get("http")
 
     @property
     def triton_client(self) -> Optional[TritonClient]:
