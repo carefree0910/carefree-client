@@ -1,6 +1,26 @@
 `carefree-client` is a client framework based on `FastAPI`. It also supports interacting with Triton Inference Server.
 
 
+# pip
+
+
+## Install
+
+```bash
+pip install -e .
+```
+
+
+## Run
+
+```bash
+uvicorn apis.interface:app --host 0.0.0.0 --port 8123
+```
+
+
+# Docker
+
+
 ## Build
 
 ```bash
