@@ -1,5 +1,6 @@
 import sys
 import json
+import time
 import logging
 import requests
 import logging.config
@@ -114,7 +115,13 @@ async def download_image(session: ClientSession, url: str) -> Image.Image:
         raise ValueError(msg)
 
 
-async def download_image_with_retry(session: ClientSession, url: str, retry: int = 3) -> Image.Image:
+async def download_image_with_retry(
+    session: ClientSession,
+    url: str,
+    *,
+    retry: int = 3,
+    interval: int = 1,
+) -> Image.Image:
     msg = ""
     for i in range(retry):
         try:
@@ -123,13 +130,8 @@ async def download_image_with_retry(session: ClientSession, url: str, retry: int
                 logging.warning(f"succeeded after {i} retries")
             return image
         except Exception as err:
-            try:
-                image = Image.open(BytesIO(await get(url, session)))
-                if i > 0:
-                    logging.warning(f"succeeded with extra `get` after {i} retries")
-                return image
-            except:
-                msg = str(err)
+            msg = str(err)
+        time.sleep(interval)
     raise ValueError(f"{msg}\n(After {retry} retries)")
 
 
