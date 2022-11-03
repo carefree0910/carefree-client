@@ -114,12 +114,12 @@ async def download_image(session: ClientSession, url: str) -> Image.Image:
             decoded = raw_data.decode("utf-8")
             msg = decoded if decoded.startswith("<") else str(err)
         except:
-            msg = str(err)
+            msg = f"raw | {raw_data[:20]} | err | {err}"
         try:
-            res = requests.get(url)
-            return Image.open(BytesIO(res.content))
+            raw_data = requests.get(url).content
+            return Image.open(BytesIO(raw_data))
         except Exception as err2:
-            msg = f"{msg}\n{err2}"
+            msg = f"{msg} ||| raw | {raw_data[:20]} | err | {err2}"
         raise ValueError(msg)
 
 
