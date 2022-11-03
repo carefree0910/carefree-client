@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 DESCRIPTION = "Client framework based on FastAPI"
 with open("README.md", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()
