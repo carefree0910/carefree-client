@@ -25,7 +25,11 @@ async def get(url: str, session: ClientSession) -> bytes:
         return await response.read()
 
 
-async def post(url: str, json: Dict[str, Any], session: ClientSession) -> Dict[str, Any]:
+async def post(
+    url: str,
+    json: Dict[str, Any],
+    session: ClientSession,
+) -> Dict[str, Any]:
     async with session.post(url, json=json) as response:
         return await response.json()
 
@@ -44,11 +48,15 @@ class RuntimeError(BaseModel):
 
 def raise_err(err: Exception) -> None:
     logging.exception(err)
-    raise HTTPException(status_code=error_code, detail=" | ".join(map(repr, sys.exc_info()[:2] + (str(err),))))
+    raise HTTPException(
+        status_code=error_code,
+        detail=" | ".join(map(repr, sys.exc_info()[:2] + (str(err),))),
+    )
 
 
 def log_endpoint(endpoint: str, data: BaseModel) -> None:
-    logging.debug(f"{endpoint} endpoint entered with kwargs : {json.dumps(data.dict(), ensure_ascii=False)}")
+    msg = f"{endpoint} endpoint entered with kwargs : {json.dumps(data.dict(), ensure_ascii=False)}"
+    logging.debug(msg)
 
 
 def log_times(endpoint: str, times: Dict[str, float]) -> None:
