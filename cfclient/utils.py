@@ -1,6 +1,7 @@
 import sys
 import json
 import logging
+import requests
 import logging.config
 
 import numpy as np
@@ -105,6 +106,11 @@ async def download_image(session: ClientSession, url: str) -> Image.Image:
             msg = decoded if decoded.startswith("<") else str(err)
         except:
             msg = str(err)
+        try:
+            res = requests.get(url)
+            return Image.open(BytesIO(res.content))
+        except Exception as err2:
+            msg = f"{msg}\n{err2}"
         raise ValueError(msg)
 
 
