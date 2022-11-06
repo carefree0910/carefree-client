@@ -46,12 +46,13 @@ class RuntimeError(BaseModel):
         }
 
 
+def get_err_msg(err: Exception) -> str:
+    return " | ".join(map(repr, sys.exc_info()[:2] + (str(err),)))
+
+
 def raise_err(err: Exception) -> None:
     logging.exception(err)
-    raise HTTPException(
-        status_code=error_code,
-        detail=" | ".join(map(repr, sys.exc_info()[:2] + (str(err),))),
-    )
+    raise HTTPException(status_code=error_code, detail=get_err_msg(err))
 
 
 def log_endpoint(endpoint: str, data: BaseModel) -> None:
@@ -165,6 +166,7 @@ __all__ = [
     "post",
     "raise_err",
     "log_times",
+    "get_err_msg",
     "log_endpoint",
     "get_responses",
     "download_image",
