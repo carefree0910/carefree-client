@@ -9,6 +9,7 @@ import numpy as np
 
 from io import BytesIO
 from PIL import Image
+from PIL import ImageOps
 from typing import Any
 from typing import Dict
 from typing import List
@@ -106,7 +107,7 @@ Bytes of the output image.
     )
 
 
-async def download_image(session: ClientSession, url: str) -> Image.Image:
+async def _download_image(session: ClientSession, url: str) -> Image.Image:
     raw_data = None
     try:
         raw_data = await get(url, session)
@@ -129,6 +130,12 @@ async def download_image(session: ClientSession, url: str) -> Image.Image:
             else:
                 msg = f"{msg} ||| raw | {raw_data[:20]} | err | {err2}"
         raise ValueError(msg)
+
+
+async def download_image(session: ClientSession, url: str) -> Image.Image:
+    img = await _download_image(session, url)
+    img = ImageOps.exif_transpose(img)
+    return img
 
 
 async def download_image_with_retry(
