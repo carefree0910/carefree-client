@@ -107,10 +107,17 @@ Bytes of the output image.
     )
 
 
+async def _download(session: ClientSession, url: str) -> bytes:
+    try:
+        return await get(url, session)
+    except Exception:
+        return requests.get(url).content
+
+
 async def _download_image(session: ClientSession, url: str) -> Image.Image:
     raw_data = None
     try:
-        raw_data = await get(url, session)
+        raw_data = await _download(url, session)
         return Image.open(BytesIO(raw_data))
     except Exception as err:
         if raw_data is None:
@@ -120,15 +127,6 @@ async def _download_image(session: ClientSession, url: str) -> Image.Image:
                 msg = raw_data.decode("utf-8")
             except:
                 msg = f"raw | {raw_data[:20]} | err | {err}"
-        raw_data = None
-        try:
-            raw_data = requests.get(url).content
-            return Image.open(BytesIO(raw_data))
-        except Exception as err2:
-            if raw_data is None:
-                msg = f"{msg} ||| raw | None | err | {err2}"
-            else:
-                msg = f"{msg} ||| raw | {raw_data[:20]} | err | {err2}"
         raise ValueError(msg)
 
 
