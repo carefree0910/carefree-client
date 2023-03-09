@@ -162,6 +162,16 @@ async def _download_with_retry(
     raise ValueError(f"{msg}\n(After {retry} retries)")
 
 
+async def download_with_retry(
+    session: ClientSession,
+    url: str,
+    *,
+    retry: int = 3,
+    interval: int = 1,
+) -> bytes:
+    return _download_with_retry(_download, session, url, retry, interval)
+
+
 async def download_image_with_retry(
     session: ClientSession,
     url: str,
