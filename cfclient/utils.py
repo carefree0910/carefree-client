@@ -120,7 +120,7 @@ async def _download(session: ClientSession, url: str) -> bytes:
 async def _download_image(session: ClientSession, url: str) -> Image.Image:
     raw_data = None
     try:
-        raw_data = await _download(url, session)
+        raw_data = await _download(session, url)
         return Image.open(BytesIO(raw_data))
     except Exception as err:
         if raw_data is None:
@@ -169,7 +169,7 @@ async def download_with_retry(
     retry: int = 3,
     interval: int = 1,
 ) -> bytes:
-    return _download_with_retry(_download, session, url, retry, interval)
+    return await _download_with_retry(_download, session, url, retry, interval)
 
 
 async def download_image_with_retry(
@@ -179,7 +179,7 @@ async def download_image_with_retry(
     retry: int = 3,
     interval: int = 1,
 ) -> Image.Image:
-    return _download_with_retry(_download_image, session, url, retry, interval)
+    return await _download_with_retry(_download_image, session, url, retry, interval)
 
 
 def distances2scores(distances: List[float]) -> List[float]:
