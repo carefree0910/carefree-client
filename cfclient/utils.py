@@ -14,7 +14,10 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Type
+from typing import TypeVar
+from typing import Callable
 from typing import Optional
+from typing import Awaitable
 from aiohttp import ClientSession
 from fastapi import Response
 from fastapi import HTTPException
@@ -136,6 +139,29 @@ async def download_image(session: ClientSession, url: str) -> Image.Image:
     return img
 
 
+TRes = TypeVar("TRes")
+
+
+async def _download_with_retry(
+    download_fn: Callable[[ClientSession, str], Awaitable[TRes]],
+    session: ClientSession,
+    url: str,
+    retry: int = 3,
+    interval: int = 1,
+) -> TRes:
+    msg = ""
+    for i in range(retry):
+        try:
+            res = await download_fn(session, url)
+            if i > 0:
+                logging.warning(f"succeeded after {i} retries")
+            return res
+        except Exception as err:
+            msg = str(err)
+        time.sleep(interval)
+    raise ValueError(f"{msg}\n(After {retry} retries)")
+
+
 async def download_image_with_retry(
     session: ClientSession,
     url: str,
@@ -143,17 +169,7 @@ async def download_image_with_retry(
     retry: int = 3,
     interval: int = 1,
 ) -> Image.Image:
-    msg = ""
-    for i in range(retry):
-        try:
-            image = await download_image(session, url)
-            if i > 0:
-                logging.warning(f"succeeded after {i} retries")
-            return image
-        except Exception as err:
-            msg = str(err)
-        time.sleep(interval)
-    raise ValueError(f"{msg}\n(After {retry} retries)")
+    return _download_with_retry(_download_image, session, url, retry, interval)
 
 
 def distances2scores(distances: List[float]) -> List[float]:
