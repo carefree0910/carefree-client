@@ -13,9 +13,9 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 
 from cfclient.models import *
+from cftool.web import get_responses
 from cfclient.core import HttpClient
 from cfclient.core import TritonClient
-from cfclient.utils import get_responses
 from cfclient.utils import run_algorithm
 
 
@@ -52,6 +52,7 @@ with open(os.path.join(root, "config.yml")) as f:
 
 excluded_endpoints = {"/health", "/redoc", "/docs", "/openapi.json"}
 
+
 class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if not record.args:
@@ -61,6 +62,7 @@ class EndpointFilter(logging.Filter):
         if record.args[2] in excluded_endpoints:
             return False
         return True
+
 
 logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
@@ -82,8 +84,7 @@ clients = dict(
 
 # algorithms
 loaded_algorithms: Dict[str, AlgorithmBase] = {
-    k: v(clients)
-    for k, v in algorithms.items()
+    k: v(clients) for k, v in algorithms.items()
 }
 
 
@@ -96,6 +97,7 @@ DOCS_DESCRIPTION = (
     "This is a client framework based on FastAPI. "
     "It also supports interacting with Triton Inference Server."
 )
+
 
 def carefree_schema() -> Dict[str, Any]:
     schema = get_openapi(
@@ -118,8 +120,10 @@ def carefree_schema() -> Dict[str, Any]:
 class HealthStatus(Enum):
     ALIVE = "alive"
 
+
 class HealthCheckResponse(BaseModel):
     status: HealthStatus
+
 
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check() -> HealthCheckResponse:
@@ -142,6 +146,7 @@ async def startup() -> None:
     http_client.start()
     for k, v in loaded_algorithms.items():
         v.initialize()
+
 
 @app.on_event("shutdown")
 async def shutdown() -> None:

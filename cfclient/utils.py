@@ -1,4 +1,3 @@
-import sys
 import json
 import time
 import logging
@@ -13,15 +12,12 @@ from PIL import ImageOps
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Type
 from typing import TypeVar
 from typing import Callable
-from typing import Optional
 from typing import Awaitable
 from aiohttp import ClientSession
-from fastapi import Response
-from fastapi import HTTPException
 from pydantic import BaseModel
+from cftool.web import raise_err
 
 
 async def get(url: str, session: ClientSession) -> bytes:
@@ -38,27 +34,6 @@ async def post(
         return await response.json()
 
 
-error_code = 406
-
-
-class RuntimeError(BaseModel):
-    detail: str
-
-    class Config:
-        schema_extra = {
-            "example": {"detail": "RuntimeError occurred."},
-        }
-
-
-def get_err_msg(err: Exception) -> str:
-    return " | ".join(map(repr, sys.exc_info()[:2] + (str(err),)))
-
-
-def raise_err(err: Exception) -> None:
-    logging.exception(err)
-    raise HTTPException(status_code=error_code, detail=get_err_msg(err))
-
-
 def log_endpoint(endpoint: str, data: BaseModel) -> None:
     msg = f"{endpoint} endpoint entered with kwargs : {json.dumps(data.dict(), ensure_ascii=False)}"
     logging.debug(msg)
@@ -69,45 +44,11 @@ def log_times(endpoint: str, times: Dict[str, float]) -> None:
     logging.debug(f"elapsed time of endpoint {endpoint} : {json.dumps(times)}")
 
 
-def get_responses(
-    success_model: Type[BaseModel],
-    *,
-    json_example: Optional[Dict[str, Any]] = None,
-) -> Dict[int, Dict[str, Type]]:
-    success_response = {"model": success_model}
-    if json_example is not None:
-        content = success_response["content"] = {}
-        json_field = content["application/json"] = {}
-        json_field["example"] = json_example
-    return {
-        200: success_response,
-        error_code: {"model": RuntimeError},
-    }
-
-
 async def run_algorithm(algorithm: Any, data: BaseModel, *args: Any) -> BaseModel:
     try:
         return await algorithm.run(data, *args)
     except Exception as err:
         raise_err(err)
-
-
-def get_image_response_kwargs() -> Dict[str, Any]:
-    example = "\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x00\\x00\\x00\\x00:~\\x9bU\\x00\\x00\\x00\\nIDATx\\x9cc`\\x00\\x00\\x00\\x02\\x00\\x01H\\xaf\\xa4q\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82"
-    responses = {
-        200: {"content": {"image/png": {"example": example}}},
-        error_code: {"model": RuntimeError},
-    }
-    description = """
-Bytes of the output image.
-+ When using `requests` in `Python`, you can get the `bytes` with `res.content`.
-+ When using `fetch` in `JavaScript`, you can get the `Blob` with `await res.blob()`.
-"""
-    return dict(
-        responses=responses,
-        response_class=Response(content=b""),
-        response_description=description,
-    )
 
 
 async def _download(session: ClientSession, url: str) -> bytes:
@@ -195,11 +136,8 @@ def distances2scores(distances: List[float]) -> List[float]:
 __all__ = [
     "get",
     "post",
-    "raise_err",
     "log_times",
-    "get_err_msg",
     "log_endpoint",
-    "get_responses",
     "download_image",
     "download_image_with_retry",
     "distances2scores",

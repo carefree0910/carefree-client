@@ -29,6 +29,7 @@ setup(
         "gevent",
         "geventhttpclient",
         "aiohttp",
+        "carefree-toolkit>=0.3.5",
     ],
     author="carefree0910",
     author_email="syameimaru.saki@gmail.com",
