@@ -20,8 +20,8 @@ from pydantic import BaseModel
 from cftool.web import raise_err
 
 
-async def get(url: str, session: ClientSession) -> bytes:
-    async with session.get(url) as response:
+async def get(url: str, session: ClientSession, **kwargs: Any) -> bytes:
+    async with session.get(url, **kwargs) as response:
         return await response.read()
 
 
@@ -29,8 +29,9 @@ async def post(
     url: str,
     json: Dict[str, Any],
     session: ClientSession,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
-    async with session.post(url, json=json) as response:
+    async with session.post(url, json=json, **kwargs) as response:
         return await response.json()
 
 
