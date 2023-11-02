@@ -18,6 +18,8 @@ class HelloResponse(BaseModel):
 
 @AlgorithmBase.register("demo.hello")
 class Hello(AlgorithmBase):
+    endpoint = demo_hello_endpoint
+
     def initialize(self) -> None:
         pass
 
