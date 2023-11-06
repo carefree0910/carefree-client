@@ -52,17 +52,17 @@ async def run_algorithm(algorithm: Any, data: BaseModel, *args: Any) -> BaseMode
         raise_err(err)
 
 
-async def _download(session: ClientSession, url: str) -> bytes:
+async def _download(session: ClientSession, url: str, **kw: Any) -> bytes:
     try:
-        return await get(url, session)
+        return await get(url, session, **kw)
     except Exception:
-        return requests.get(url).content
+        return requests.get(url, **kw).content
 
 
-async def _download_image(session: ClientSession, url: str) -> Image.Image:
+async def _download_image(session: ClientSession, url: str, **kw: Any) -> Image.Image:
     raw_data = None
     try:
-        raw_data = await _download(session, url)
+        raw_data = await _download(session, url, **kw)
         return Image.open(BytesIO(raw_data))
     except Exception as err:
         if raw_data is None:
@@ -75,8 +75,8 @@ async def _download_image(session: ClientSession, url: str) -> Image.Image:
         raise ValueError(msg)
 
 
-async def download_image(session: ClientSession, url: str) -> Image.Image:
-    img = await _download_image(session, url)
+async def download_image(session: ClientSession, url: str, **kw: Any) -> Image.Image:
+    img = await _download_image(session, url, **kw)
     img = ImageOps.exif_transpose(img)
     return img
 
@@ -90,11 +90,12 @@ async def _download_with_retry(
     url: str,
     retry: int = 3,
     interval: int = 1,
+    **kw: Any,
 ) -> TRes:
     msg = ""
     for i in range(retry):
         try:
-            res = await download_fn(session, url)
+            res = await download_fn(session, url, **kw)
             if i > 0:
                 logging.warning(f"succeeded after {i} retries")
             return res
@@ -110,8 +111,9 @@ async def download_with_retry(
     *,
     retry: int = 3,
     interval: int = 1,
+    **kw: Any,
 ) -> bytes:
-    return await _download_with_retry(_download, session, url, retry, interval)
+    return await _download_with_retry(_download, session, url, retry, interval, **kw)
 
 
 async def download_image_with_retry(
@@ -120,8 +122,11 @@ async def download_image_with_retry(
     *,
     retry: int = 3,
     interval: int = 1,
+    **kw: Any,
 ) -> Image.Image:
-    return await _download_with_retry(_download_image, session, url, retry, interval)
+    return await _download_with_retry(
+        _download_image, session, url, retry, interval, **kw
+    )
 
 
 def distances2scores(distances: List[float]) -> List[float]:
