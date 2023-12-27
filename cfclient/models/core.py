@@ -105,6 +105,9 @@ class PosterCodesResponse(BaseModel):
     group_codes: List[str] = Field(..., description="Group codes of the retrieved candidates.")
     model_codes: List[str] = Field(..., description="Model codes of the retrieved candidates.")
 
+    class Config:
+        protected_namespaces = ()
+
 
 # algorithms
 
